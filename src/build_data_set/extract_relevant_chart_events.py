@@ -1,5 +1,6 @@
 import pandas as pd
 
+import math
 import numpy as np
 import os
 import re
@@ -12,7 +13,7 @@ import vent_filters
 
 
 # number of rows in CHARTEVENTS to read in at a time (there are 330_712_483 lines in CHARTEVENTS)
-CHUNK_SIZE = 10**5
+CHUNK_SIZE = 10**6
 
 
 # time window from end of intubation episode that chart data is extracted
@@ -40,14 +41,13 @@ count = 0
 path = os.path.join(mimic_dir, tables["chartevents"] + ".csv")
 for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=list(ce.columns), dtype= {"VALUE" : str}, parse_dates = ["CHARTTIME"]):
   count += 1
+  print("processing CHARTEVENTS chunk:",count, "of", math.ceil(330712483/CHUNK_SIZE))
   for name, group in vent_episodes.groupby(["ICUSTAY_ID", "EPISODE"]):
     if name[1]==1: # only extract chart data from before end of first intubation episode
       interval = pd.Interval(group.PERIOD.values[0].right - WINDOW_SIZE, group.PERIOD.values[0].right) # one window period before end of episode
       for time, time_group in chunk[chunk["ICUSTAY_ID"] == name[0]].groupby("CHARTTIME"): # loop through all the times in a given ICUSTAY
         if time in interval: # but only keep those in the window
           ce = ce.append(time_group)
-  if count > 1:
-    break
 
 
 # save out result
