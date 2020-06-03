@@ -1,7 +1,3 @@
-project_dir = "/Users/wrs/Documents/insight/project"
-
-mimic_dir = "/Volumes/gaia/mimic"
-
 ################# DEFINE MIMIC TABLES #########################
 
 tables = {
