@@ -1,5 +1,6 @@
 import pandas as pd
 # pd.set_option("display.max_rows", None, "display.max_columns", None)
+import math
 import numpy as np
 import os
 import re
@@ -12,7 +13,7 @@ import vent_filters
 
 
 # number of rows in CHARTEVENTS to read in at a time (there are 330_712_483 lines in CHARTEVENTS)
-CHUNK_SIZE = 10**5
+CHUNK_SIZE = 10**6
 
 
 # initialize chartevents dataframe
@@ -46,13 +47,12 @@ path = os.path.join(mimic_dir, tables["chartevents"] + ".csv")
 for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=["ITEMID","VALUE","ICUSTAY_ID","CHARTTIME"], dtype= {"VALUE" : str}, parse_dates = ["CHARTTIME"]):
   # print(chunk[chunk.ICUSTAY_ID == 247247])
   count += 1
+  print("reading CHARTEVENTS chunk:",count, "of", math.ceil(330712483/CHUNK_SIZE))
   chunk["MV_BOOL"] = chunk.apply(vent_filters.mechanical_vent, axis=1)
   chunk["OX_BOOL"] = chunk.apply(vent_filters.oxygen_therapy, axis=1)
   chunk["EX_BOOL"] = chunk.apply(vent_filters.extubation, axis=1)
   chunk["SE_BOOL"] = chunk.apply(vent_filters.self_extubation, axis=1)
   ce = ce.append(chunk.loc[chunk.apply(vent_filters.isrelevant, axis=1), list(ce.columns)])
-  if count > 1:
-      break
 
 
 ce.sort_values(by="CHARTTIME", inplace=True)
@@ -90,7 +90,7 @@ def find_first(arr):
 
 # find last true element in boolean array
 def find_last(arr):
-  return len(arr) - (find_first(arr) + 1)
+  return len(arr) - (find_first(arr[::-1]) + 1)
 
 
 path = os.path.join(project_dir, "log.txt") # for logging ICUSTAY_IDs with just one time
