@@ -14,11 +14,11 @@ import vent_filters
 
 # number of rows in CHARTEVENTS to read in at a time (there are 330_712_483 lines in CHARTEVENTS)
 CHUNK_SIZE = 10**6
-NUM_CHUNKS = 15#np.inf
+NUM_CHUNKS = np.inf
 
 
 # time window from end of intubation episode that chart data is extracted
-WINDOW_SIZE = pd.Timedelta(hours=2)
+WINDOW_SIZE = pd.Timedelta(hours=3)
 
 
 # load in ventilation times
