@@ -14,10 +14,11 @@ import vent_filters
 
 # number of rows in CHARTEVENTS to read in at a time (there are 330_712_483 lines in CHARTEVENTS)
 CHUNK_SIZE = 10**6
+NUM_CHUNKS = 15#np.inf
 
 
 # time window from end of intubation episode that chart data is extracted
-WINDOW_SIZE = pd.Timedelta(hours=1)
+WINDOW_SIZE = pd.Timedelta(hours=2)
 
 
 # load in ventilation times
@@ -44,12 +45,16 @@ for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=list(ce.columns), d
   print("processing CHARTEVENTS chunk:",count, "of", math.ceil(330712483/CHUNK_SIZE))
   for name, group in vent_episodes.groupby(["ICUSTAY_ID", "EPISODE"]):
     if name[1]==1: # only extract chart data from before end of first intubation episode
-      interval = pd.Interval(group.PERIOD.values[0].right - WINDOW_SIZE, group.PERIOD.values[0].right) # one window period before end of episode
+      interval = pd.Interval(group.STOPTIME.iloc[0] - WINDOW_SIZE, group.STOPTIME.iloc[0], closed="both") # one window period before end of episode
       for time, time_group in chunk[chunk["ICUSTAY_ID"] == name[0]].groupby("CHARTTIME"): # loop through all the times in a given ICUSTAY
         if time in interval: # but only keep those in the window
           ce = ce.append(time_group)
-
+  if count > NUM_CHUNKS:
+    break
 
 # save out result
+print("Saving processed chart events")
 path = os.path.join(processed_data_dir, "chart_data.h5")
-ce.to_hdf(path, "charts")
+ce.to_hdf(path, "charts", mode="w")
+
+print("Done processing chart events!")
