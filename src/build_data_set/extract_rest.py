@@ -97,5 +97,13 @@ pat = pat[pat["SUBJECT_ID"].isin(adm["SUBJECT_ID"])]
 path = os.path.join(processed_data_dir, "rest.h5")
 pat.to_hdf(path, "patients", mode="a", format="table")
 
+# PROCEDURES_ICD
+print("Process icd procedures")
+path = os.path.join(mimic_dir, tables["procedures_icd"] + ".csv")
+picd = pd.read_csv(path)
+picd = picd[picd["SUBJECT_ID"].isin(adm["SUBJECT_ID"])]
+path = os.path.join(processed_data_dir, "rest.h5")
+picd.to_hdf(path, "procedures_icd", mode="a", format="table")
+
 
 print("Done processing mimic records!")
