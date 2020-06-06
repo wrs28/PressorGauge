@@ -36,7 +36,7 @@ dtypes = {
 
 print("Extracting relevent lab events")
 path = os.path.join(mimic_dir, tables["labevents"] + ".csv")
-ce_lists = [[] for i in range(8)]
+ce_lists = [[] for i in range(12)]
 count = 0
 for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=ce_columns, dtype=dtypes, parse_dates = ["CHARTTIME"]):
   count += 1
