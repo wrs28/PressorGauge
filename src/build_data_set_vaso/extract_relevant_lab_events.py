@@ -37,6 +37,7 @@ dtypes = {
 print("Extracting relevent lab events")
 path = os.path.join(mimic_dir, tables["labevents"] + ".csv")
 ce_lists = [[] for i in range(12)]
+# window_times = [[] for i in range(12)]
 count = 0
 for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=ce_columns, dtype=dtypes, parse_dates = ["CHARTTIME"]):
   count += 1
@@ -47,15 +48,16 @@ for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=ce_columns, dtype=d
       if episode==1:
         # one window period before end of episode
         for time, time_group in chunk[chunk.SUBJECT_ID == subject].groupby("CHARTTIME"):
+          time_group = time_group.copy()
           # one window period before end of episode
-          for i in range(8):
+          for i in range(len(ce_lists)):
             interval = pd.Interval(group.STARTTIME.iloc[0] - (i+1)*WINDOW_SIZE, group.STARTTIME.iloc[0] - i*WINDOW_SIZE, closed="both")
             # but only keep those in the window
             if time in interval:
+              time_group["WINDOW_MID"] = interval.mid
               ce_lists[i].append(time_group)
   else:
     break
-
 
 
 for i in range(len(ce_lists)):

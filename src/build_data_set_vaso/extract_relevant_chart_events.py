@@ -42,12 +42,15 @@ for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=ce_columns, dtype=d
       if episode==1:
         # loop through all the times in a given ICUSTAY
         for time, time_group in chunk[chunk.ICUSTAY_ID == icustay].groupby("CHARTTIME"):
+          time_group = time_group.copy()
           # one window period before end of episode
-          for i in range(8):
+          for i in range(len(ce_lists)):
             interval = pd.Interval(group.STARTTIME.iloc[0] - (i+1)*WINDOW_SIZE, group.STARTTIME.iloc[0] - i*WINDOW_SIZE, closed="both")
             # but only keep those in the window
             if time in interval:
+              time_group["WINDOW_MID"] = interval.mid
               ce_lists[i].append(time_group)
+              # ce_lists[i]["WINDOW_MID"] = interval.mid
   else:
     break
 
