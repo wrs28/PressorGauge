@@ -5,7 +5,7 @@ from joblib import load
 
 
 
-clf, X_test, y_tes = load("model.joblib")
+clf, X_test, y_test = load("model.joblib")
 
 
 # Add a selectbox to the sidebar:
