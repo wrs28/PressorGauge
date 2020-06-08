@@ -25,13 +25,13 @@ X_test[index]
 
 
 
-X_test0 = float(st.text_input("label goes here", X_test[index][0]))
-X_test1 = float(st.text_input("label goes here", X_test[index][1]))
-X_test2 = float(st.text_input("label goes here", X_test[index][2]))
-X_test3 = float(st.text_input("label goes here", X_test[index][3]))
+# X_test0 = float(st.text_input("label goes here", X_test[index][0]))
+# X_test1 = float(st.text_input("label goes here", X_test[index][1]))
+# X_test2 = float(st.text_input("label goes here", X_test[index][2]))
+# X_test3 = float(st.text_input("label goes here", X_test[index][3]))
 
-X_test = np.array([[X_test0,X_test1,X_test2,X_test3],])
-a = clf.predict(X_test)
+# X_test = np.array([[X_test0,X_test1,X_test2,X_test3],])
+a = clf.predict(X_test[index])
 a[0]
 
 y_test[index]
