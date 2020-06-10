@@ -10,6 +10,9 @@ dependencies:
 - scipy
 - joblib
 - scikit-learn
+- psycopg2
+- sqlalchemy
+- progressbar2
 - pip
 - pip:
   - streamlit
