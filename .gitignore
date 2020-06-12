@@ -1,8 +1,6 @@
-data/
 archive/
-*.h5
 .DS_Store
-log.txt
+*.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -134,3 +132,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
