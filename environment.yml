@@ -6,6 +6,7 @@ dependencies:
 - conda
 - pandas
 - matplotlib
+- seaborn
 - numpy
 - scipy
 - joblib
