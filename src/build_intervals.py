@@ -4,7 +4,7 @@ import pandas as pd
 import progressbar
 import sqlalchemy
 
-engine = sqlalchemy.create_engine('postgres://wrs:wrs@localhost/PressorGauge')
+engine = sqlalchemy.create_engine('postgres://postgres:admin@localhost/PressorGauge')
 with engine.connect() as connection:
   vaso_episodes = pd.read_sql("pressors_by_icustay", con=connection, index_col="ICUSTAY_ID")
 

@@ -242,7 +242,7 @@ print("\tdropping",len(vaso_episodes) - len(vaso_episodes.HADM_ID.unique()),"mul
 vaso_episodes.drop_duplicates("HADM_ID", inplace=True)
 
 
-engine = sqlalchemy.create_engine('postgres://wrs:wrs@localhost/PressorGauge')
+engine = sqlalchemy.create_engine('postgres://postgres:admin@localhost/PressorGauge')
 
 print("\tsaving to SQL database `PressorGauge`, table `pressors_by_icustay`")
 with engine.connect() as connection:
