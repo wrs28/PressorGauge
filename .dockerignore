@@ -1,0 +1,9 @@
+__pycache__/
+.git
+.ipynb_checkpoints/
+archive/
+src/
+.DS_Store
+.gitignore
+*.ipynb
+#.env

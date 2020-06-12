@@ -1,0 +1,14 @@
+version: "3"
+services:
+  web:
+    image: wrs28/pressorgauge
+    ports:
+      - "80:8501"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: pressorgauge
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: web
+    env_file:
+       - ./pressorgauge_docker.env
