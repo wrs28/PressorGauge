@@ -13,7 +13,7 @@ from directories import project_dir, processed_data_dir, mimic_dir
 from definitions import tables
 
 # load in ventilation times
-engine = sqlalchemy.create_engine('postgres://wrs:wrs@localhost/PressorGauge')
+engine = sqlalchemy.create_engine('postgres://postgres:postgres@localhost/PressorGauge')
 
 with engine.connect() as connection:
   vaso_episodes = pd.read_sql("pressors_by_icustay", con=connection, index_col="ICUSTAY_ID")
@@ -71,7 +71,7 @@ with engine.connect() as connection:
         i = find_first((icu_interval_splits[1:-1].values < time) & (time <= icu_interval_splits[:-2].values))
         if i:
           time_group = time_group.copy()
-          time_group.PRESSOR_WINDOW = i
+          time_group.HOURS_BEFORE_PRESSOR = i
           # if within one day of pressor event, lable true if episode==1
           if i < 24:
             time_group.PRESSOR_LABEL = vaso_episodes[vaso_episodes.index==icustay].EPISODE.iloc[0]==1
