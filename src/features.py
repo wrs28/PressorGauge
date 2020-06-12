@@ -280,7 +280,7 @@ def add_features(data, feature_list, chart, lab):
             ident = "ICUSTAY_ID"
             chartlab = chart
         else:
-            ident = "SUBJECT_ID"
+            ident = "HADM_ID"
             chartlab = lab
 
         ab = features[feature]["ab"]
@@ -317,11 +317,11 @@ def add_features(data, feature_list, chart, lab):
         data = data.join(df_std.set_index(ident) , on=ident, how="left")
         data = data.join(df_min.set_index(ident) , on=ident, how="left")
         data = data.join(df_max.set_index(ident) , on=ident, how="left")
-        data[ab + "_RATE"] = 60*60*(data[ab + "_LAST"] - data[ab + "_FIRST"])/((data[ab + "_LAST_TIME"] - data[ab + "_FIRST_TIME"]).dt.seconds)
+        data[ab + "_RATE"] = 60*(data[ab + "_LAST"] - data[ab + "_FIRST"])/((data[ab + "_LAST_TIME"] - data[ab + "_FIRST_TIME"]))
 
-    df_mid = group.agg({"WINDOW_MID" : first})
-    df_mid.reset_index(inplace=True)
-    data = data.join(df_mid.set_index(ident) , on=ident, how="left")
+    # df_mid = group.agg({"WINDOW_MID" : first})
+    # df_mid.reset_index(inplace=True)
+    # data = data.join(df_mid.set_index(ident) , on=ident, how="left")
 
 
     return data
