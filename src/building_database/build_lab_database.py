@@ -41,7 +41,7 @@ def extract_lab_events(vaso_episodes, interval_splits):
     date_cols = ["CHARTTIME"]
 
     print_log("extracting relevent lab events")
-    path = os.path.join(mimic_dir, tables["labevents"] + ".csv")
+    path = os.path.join(mimic_dir, "LABEVENTS.csv")
     count = 0
     replace_flag = True
     for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=columns, dtype=dtypes, parse_dates=date_cols):
