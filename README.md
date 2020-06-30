@@ -68,12 +68,15 @@ To serve the model locally, simply run
 ````
 streamlit run PressorGauge.py
 ````
+from within the `src` directory.
 
 To create and run a Docker image locally, can call the script `local_build.sh`.
+It can be found at `localhost:80`
 
 To publish a Docker image to [dockerhub](https://hub.docker.com) and push it to AWS, call the script `aws-docker-build/aws_build.sh`.
 Note this file must be adapted for your local build.
 The first line `source insight` activates the PressorGauge environment, changes directory to `PressorGauge`, and loads credentials as enviorenmental variables.
+After container is activated on AWS, result can be found at [pressorgauge.com](pressorgauge.com).
 
 
 ### Analysis
