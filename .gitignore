@@ -1,9 +1,9 @@
 archive/
 .DS_Store
 *.env
-*.png
 *.p
 *.joblib
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
