@@ -2,7 +2,7 @@ FROM python:3
 
 EXPOSE 8501
 
-ADD streamlit-app /opt/streamlit-app
+ADD src /opt/streamlit-app
 WORKDIR /opt/streamlit-app
 
 COPY requirements.txt ./requirements.txt
@@ -19,4 +19,4 @@ headless = true\n\
 enableCORS = false\n\
 " > ~/.streamlit/config.toml
 
-CMD streamlit run first_app.py
+CMD streamlit run PressorGauge.py
