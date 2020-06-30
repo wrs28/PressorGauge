@@ -5,4 +5,5 @@ services:
     ports:
       - "80:8501"
     volumes:
-      - ./streamlit-app:/opt/streamlit-app
+      # - ./streamlit-app:/opt/streamlit-app
+      - ./src:/opt/streamlit-app
