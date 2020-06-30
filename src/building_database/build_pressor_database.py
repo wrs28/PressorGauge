@@ -4,7 +4,7 @@ import numpy as np
 import sqlalchemy
 import pickle
 from sklearn.neighbors import KernelDensity
-from directories import project_dir, model_dir, mimic_dir, logs_dir, print_log, engine
+import directories
 
 
 RND_SEED = 1729
@@ -18,7 +18,7 @@ MINIMUM_WEIGHT_KG = 25
 
 ## load in icustay data
 def load_icustay():
-    path = os.path.join(mimic_dir, "ICUSTAYS.csv")
+    path = os.path.join(directories.mimic_dir, "ICUSTAYS.csv")
     dtypes = {
         "ICUSTAY_ID" : pd.Int32Dtype(),
         "SUBJECT_ID" : pd.Int32Dtype(),
@@ -38,7 +38,7 @@ def load_icustay():
 
 ## append admission data
 def load_admissions(icustays):
-    path = os.path.join(mimic_dir, "ADMISSIONS.csv")
+    path = os.path.join(directories.mimic_dir, "ADMISSIONS.csv")
     date_cols = [
         "ADMITTIME",
         "DISCHTIME",
@@ -53,7 +53,7 @@ def load_admissions(icustays):
 
 ## append patient data
 def load_patients(icustays):
-    path = os.path.join(mimic_dir, "PATIENTS.csv")
+    path = os.path.join(directories.mimic_dir, "PATIENTS.csv")
     date_cols = [
         "DOB",
         "DOD",
@@ -71,7 +71,7 @@ def load_patients(icustays):
 
 ## append weight
 def load_weights(icustays):
-    path = os.path.join(mimic_dir, "heightweight.csv")
+    path = os.path.join(directories.mimic_dir, "heightweight.csv")
     heightweight = pd.read_csv(path, dtype={"icustay_id": pd.Int32Dtype()}, usecols=["icustay_id", "weight_min"])
     heightweight.rename(inplace=True, columns={"icustay_id": "ICUSTAY_ID", "weight_min": "WEIGHT_KG"})
     # print num rows dropped b/c of weight
@@ -79,7 +79,7 @@ def load_weights(icustays):
     heightweight = heightweight[(MINIMUM_WEIGHT_KG < heightweight.WEIGHT_KG) & \
         (heightweight.WEIGHT_KG < MAXIMUM_WEIGHT_KG)]
     length_after_drop = len(heightweight)
-    print_log("\t",length_before_drop-length_after_drop, "icustays w/ weight greater than",\
+    directories.print_log("\t",length_before_drop-length_after_drop, "icustays w/ weight greater than",\
         MAXIMUM_WEIGHT_KG, "kg (likely mislabeled)")
     icustays = icustays.join(heightweight.set_index("ICUSTAY_ID"), on="ICUSTAY_ID", how="left")
     return icustays
@@ -87,7 +87,7 @@ def load_weights(icustays):
 
 ## append LODS (logistic organ dysfunction score)
 def load_LODS(icustays):
-    path = os.path.join(mimic_dir, "lods.csv")
+    path = os.path.join(directories.mimic_dir, "lods.csv")
     dtypes = {
         "icustay_id" : pd.Int32Dtype(),
         "LODS" : pd.Int16Dtype(),
@@ -107,7 +107,7 @@ def load_LODS(icustays):
     length_before_drop = len(lods)
     lods.dropna(axis=0,inplace=True) # 2482 na icustays
     length_after_drop = len(lods)
-    print_log("\t",length_before_drop-length_after_drop,"icustays w/o LODS")
+    directories.print_log("\t",length_before_drop-length_after_drop,"icustays w/o LODS")
     # interpret LODS scores as ints
     lods.ICUSTAY_ID = lods.ICUSTAY_ID.astype(int)
     lods.LODS = lods.LODS.astype(int)
@@ -119,7 +119,7 @@ def load_LODS(icustays):
 
 ## append OASIS (Oxford Acute Severity of Illness Score)
 def load_OASIS(icustays):
-    path = os.path.join(mimic_dir, "oasis.csv")
+    path = os.path.join(directories.mimic_dir, "oasis.csv")
     dtypes = {
         "icustay_id" : pd.Int32Dtype(),
         "OASIS" : pd.Int16Dtype(),
@@ -135,7 +135,7 @@ def load_OASIS(icustays):
     length_before_drop = len(oasis)
     oasis.dropna(axis=0,inplace=True) # 0 na icustays
     length_after_drop = len(oasis)
-    print_log("\t",length_before_drop-length_after_drop,"icustays w/o OASIS")
+    directories.print_log("\t",length_before_drop-length_after_drop,"icustays w/o OASIS")
     # interpret OASIS scores as int
     oasis.ICUSTAY_ID = oasis.ICUSTAY_ID.astype(int)
     oasis.OASIS = oasis.OASIS.astype(int)
@@ -145,7 +145,7 @@ def load_OASIS(icustays):
 
 ## append APACHE scores (acute and chronic health evaluation)
 def load_APACHE(icustays):
-    path = os.path.join(mimic_dir, "apache.csv")
+    path = os.path.join(directories.mimic_dir, "apache.csv")
     dtypes = {
         "icustay_id": pd.Int32Dtype(),
         "APSIII":  pd.Int16Dtype(),
@@ -162,7 +162,7 @@ def load_APACHE(icustays):
     length_before_drop = len(apache)
     apache.dropna(axis=0,inplace=True) # 34 na icustays
     length_after_drop = len(apache)
-    print_log("\t",length_before_drop-length_after_drop,"icustays w/o APACHE")
+    directories.print_log("\t",length_before_drop-length_after_drop,"icustays w/o APACHE")
     # interpret APACHE score as int
     apache.ICUSTAY_ID = apache.ICUSTAY_ID.astype(int)
     apache.APACHE = apache.APACHE.astype(int)
@@ -172,7 +172,7 @@ def load_APACHE(icustays):
 
 ## load in vasopressor durations
 def load_vasopressor_durations():
-    path = os.path.join(mimic_dir, "vasopressordurations.csv")
+    path = os.path.join(directories.mimic_dir, "vasopressordurations.csv")
     dtypes = {
         "icustay_id" : pd.Int32Dtype(),
         "vasonum" : pd.Int16Dtype(),
@@ -219,7 +219,7 @@ def pair_episodes_and_stays(vaso_episodes, icustays):
 def compute_hours_to_pressor(vaso_episodes):
     vaso_episodes["EPISODE_START_POST_TRANSFER"] = vaso_episodes.STARTTIME - vaso_episodes.ADMITTIME
     rows_to_remove = vaso_episodes.EPISODE_START_POST_TRANSFER > pd.Timedelta(days=MAXIMUM_TIME_TO_PRESSOR_DAYS)
-    print_log("\tdropping", sum(rows_to_remove), "icustays with first pressor episode occurring more than", "%2i"% MAXIMUM_TIME_TO_PRESSOR_DAYS, "days after admission")
+    directories.print_log("\tdropping", sum(rows_to_remove), "icustays with first pressor episode occurring more than", "%2i"% MAXIMUM_TIME_TO_PRESSOR_DAYS, "days after admission")
     vaso_episodes = vaso_episodes[~rows_to_remove]
     return vaso_episodes
 
@@ -237,23 +237,31 @@ def clean_vaso_episodes_2(vaso_episodes):
     # remove episodes that start in the first day
     sum(vaso_episodes.EPISODE_START_POST_TRANSFER < pd.Timedelta(hours=MINIMUM_TIME_TO_PRESSOR_HOURS))
     rows_to_remove = vaso_episodes.EPISODE_START_POST_TRANSFER < pd.Timedelta(hours=MINIMUM_TIME_TO_PRESSOR_HOURS)
-    print_log("\tdropping",sum(rows_to_remove),"icustays with first pressor episode occurring less than", "%2i"% MINIMUM_TIME_TO_PRESSOR_HOURS,"hours after hospital admission")
-    vaso_episodes = vaso_episodes[~rows_to_remove]
+    directories.print_log("\tdropping",sum(rows_to_remove),"icustays with first pressor episode occurring less than", "%2i"% MINIMUM_TIME_TO_PRESSOR_HOURS,"hours after hospital admission")
+    vaso_episodes = vaso_episodes[~rows_to_remove].copy()
     len(vaso_episodes)
 
     ## clean up ICU stays
     rows_to_replace = vaso_episodes.AGE > 150
-    print_log("\treplacing age of",sum(rows_to_replace),"patients over 89 with age 91")
+    directories.print_log("\treplacing age of",sum(rows_to_replace),"patients over 89 with age 91")
     vaso_episodes.loc[rows_to_replace, "AGE"] = 91
     rows_to_remove = vaso_episodes.AGE < MINIMUM_AGE
-    print_log("\tdropping",sum(rows_to_remove),"icustays with age less than", MINIMUM_AGE)
+    directories.print_log("\tdropping",sum(rows_to_remove),"icustays with age less than", MINIMUM_AGE)
     vaso_episodes = vaso_episodes[~rows_to_remove]
 
     rows_to_remove = (vaso_episodes.DURATION_HOURS < MINIMUM_PRESSOR_DURATION_MINUTES/60) & (vaso_episodes.EPISODE==1)
-    print_log("\tdropping",sum(rows_to_remove),"pressor episodes with vaso durations less than", MINIMUM_PRESSOR_DURATION_MINUTES,"minutes")
+    directories.print_log("\tdropping",sum(rows_to_remove),"pressor episodes with vaso durations less than", MINIMUM_PRESSOR_DURATION_MINUTES,"minutes")
     vaso_episodes = vaso_episodes[~rows_to_remove]
 
     vaso_episodes.set_index("ICUSTAY_ID", inplace=True)
+
+    # compute pressor time distribution
+    kde_true = KernelDensity(kernel="tophat")
+    kde_true.fit(np.reshape(vaso_episodes[vaso_episodes.EPISODE==1]["EPISODE_START_POST_TRANSFER"].values.astype(int)/10**9/60/60,(-1,1))) # in hours
+    kde_false = KernelDensity(kernel="tophat")
+    kde_false.fit(np.reshape(vaso_episodes[vaso_episodes.EPISODE==0]["EPISODE_START_POST_TRANSFER"].values.astype(int)/10**9/60/60,(-1,1))) # in hours
+    with open(os.path.join(directories.model_dir,"time_distributions.p"),"wb") as file:
+        pickle.dump({"kde_true" : kde_true, "kde_false" : kde_false},file)
 
     # vaso_episodes.reset_index(inplace=True)
     vaso_episodes["PRESSOR_START_SEC"] = vaso_episodes.STARTTIME - vaso_episodes.ADMITTIME
@@ -275,9 +283,9 @@ def clean_vaso_episodes_2(vaso_episodes):
     len1 = len(vaso_episodes)
     vaso_episodes.dropna(inplace=True)
     len2 = len(vaso_episodes)
-    print_log("\tdropping",len1-len2,"icustays with missing values")
+    directories.print_log("\tdropping",len1-len2,"icustays with missing values")
 
-    print_log("\tdropping",len(vaso_episodes) - len(vaso_episodes.HADM_ID.unique()),"multiple ICU stays in same hospital visit")
+    directories.print_log("\tdropping",len(vaso_episodes) - len(vaso_episodes.HADM_ID.unique()),"multiple ICU stays in same hospital visit")
     vaso_episodes.drop_duplicates("HADM_ID", inplace=True)
 
     return vaso_episodes
@@ -288,12 +296,12 @@ def compute_pressor_time_distribution(vaso_episodes):
     kde_true.fit(np.reshape(vaso_episodes[vaso_episodes.EPISODE==1]["EPISODE_START_POST_TRANSFER"].values.astype(int)/10**9/60/60,(-1,1))) # in hours
     kde_false = KernelDensity(kernel="tophat")
     kde_false.fit(np.reshape(vaso_episodes[vaso_episodes.EPISODE==0]["EPISODE_START_POST_TRANSFER"].values.astype(int)/10**9/60/60,(-1,1))) # in hours
-    with open(os.path.join(model_dir,"time_distributions.p"),"wb") as file:
+    with open(os.path.join(directories.model_dir,"time_distributions.p"),"wb") as file:
         pickle.dump({"kde_true" : kde_true, "kde_false" : kde_false},file)
 
 
 def main():
-    print_log("building pressor database",mode="w")
+    directories.print_log("building pressor database",mode="w")
     icustays = load_icustay()
     icustays = load_admissions(icustays)
     icustays = load_patients(icustays)
@@ -303,22 +311,21 @@ def main():
     icustays = load_APACHE(icustays)
 
     vaso_episodes = load_vasopressor_durations()
-    vaso_episodes = clean_vaso_episodes(vaso_episodes)
+    vaso_episodes = clean_vaso_episodes_1(vaso_episodes)
     vaso_episodes = pair_episodes_and_stays(vaso_episodes, icustays)
     vaso_episodes = compute_hours_to_pressor(vaso_episodes)
     vaso_episodes = clean_vaso_episodes_2(vaso_episodes)
-    compute_pressor_time_distribution(vaso_episodes)
 
-    print_log("\tsaving to SQL database `PressorGauge`, table `pressors_by_icustay`")
-    with engine.connect() as connection:
+    directories.print_log("\tsaving to SQL database `PressorGauge`, table `pressors_by_icustay`")
+    with directories.engine.connect() as connection:
         vaso_episodes.to_sql("pressors_by_icustay", con=connection, if_exists="replace", index_label="ICUSTAY_ID")
 
-    print_log("\ttotal of",len(vaso_episodes),"icustays, of which",sum(vaso_episodes.EPISODE>0),"have a pressor episode")
+    directories.print_log("\ttotal of",len(vaso_episodes),"icustays, of which",sum(vaso_episodes.EPISODE>0),"have a pressor episode")
     check = 100*float(sum(vaso_episodes.EPISODE==1))/len(vaso_episodes)
-    print_log("\tsanity check: %2.0f%%" % check,"have pressors, ideally in range 1/4 to 1/3")
+    directories.print_log("\tsanity check: %2.0f%%" % check,"have pressors, ideally in range 1/4 to 1/3")
 
-    print_log("Done building pressor database!")
-    print_log()
+    directories.print_log("Done building pressor database!")
+    directories.print_log()
 
 
 # execute only if run as a script

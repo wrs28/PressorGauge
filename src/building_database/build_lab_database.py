@@ -3,8 +3,7 @@ import pandas as pd
 import os
 import math
 import sqlalchemy
-from directories import project_dir, model_dir, mimic_dir, print_log, engine
-from definitions import tables
+import directories
 
 
 # number of rows in LABEVENTS to read in at a time (there are 27_854_055 lines in LABEVENTS)
@@ -40,8 +39,8 @@ def extract_lab_events(vaso_episodes, interval_splits):
 
     date_cols = ["CHARTTIME"]
 
-    print_log("extracting relevent lab events")
-    path = os.path.join(mimic_dir, "LABEVENTS.csv")
+    directories.print_log("extracting relevent lab events")
+    path = os.path.join(directories.mimic_dir, "LABEVENTS.csv")
     count = 0
     replace_flag = True
     for chunk in pd.read_csv(path, chunksize=CHUNK_SIZE, usecols=columns, dtype=dtypes, parse_dates=date_cols):
@@ -55,7 +54,7 @@ def extract_lab_events(vaso_episodes, interval_splits):
         if count > NUM_CHUNKS:
             break
         else:
-            print_log("\tprocessing LABEVENTS chunk:",count, "of", math.ceil(27_854_055/CHUNK_SIZE))
+            directories.print_log("\tprocessing LABEVENTS chunk:",count, "of", math.ceil(27_854_055/CHUNK_SIZE))
             # loop through all the times in a given hospital admission (HADM_ID), recall we keep only hospital admissions with 1 icustay
             for (time, hadm), time_group in chunk[chunk.HADM_ID.isin(vaso_episodes.HADM_ID)].groupby(["CHARTTIME","HADM_ID"]):
                 # only extract lab data if it falls in the interval i
@@ -71,25 +70,25 @@ def extract_lab_events(vaso_episodes, interval_splits):
                         replace_flag = False
                     else:
                         mode = "append"
-                    with engine.connect() as connection:
+                    with directories.engine.connect() as connection:
                         time_group.to_sql("lab_events", con=connection, if_exists=mode, index=False)
 
 
 
 def main():
     # load in ventilation times
-    with engine.connect() as connection:
+    with directories.engine.connect() as connection:
         vaso_episodes = pd.read_sql("pressors_by_icustay", con=connection, index_col="ICUSTAY_ID")
 
-    with engine.connect() as connection:
+    with directories.engine.connect() as connection:
         interval_splits = pd.read_sql("interval_splits", con=connection, index_col="ICUSTAY_ID")
 
     interval_splits.set_index("HADM_ID", inplace=True)
 
     extract_lab_events(vaso_episodes, interval_splits)
 
-    print_log("Done processing lab events!")
-    print_log()
+    directories.print_log("Done processing lab events!")
+    directories.print_log()
 
 
 # execute only if run as a script
