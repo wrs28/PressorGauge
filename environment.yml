@@ -13,7 +13,7 @@ dependencies:
 - scikit-learn
 - psycopg2
 - sqlalchemy
-- progressbar2
+- shap
 - pip
 - pip:
   - streamlit
