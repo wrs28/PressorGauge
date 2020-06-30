@@ -67,6 +67,8 @@ pip install -r requirements
 
 ### Analysis
 
+![pO2 distributions](https://github.com/wrs28/PressorGauge/blob/master/images/pO2_dist.png)
+
 ![Random Forest Learning Curve](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_learning_curve.png)
 
 ![Random Forest ROC curve](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_roc.png)
