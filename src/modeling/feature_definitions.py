@@ -1,8 +1,5 @@
 import numpy as np
 import pandas as pd
-# from features_dict import features
-# from modeling.features_dict import features
-# from src.modeling.features_dict import features
 
 
 features_to_keep = [
