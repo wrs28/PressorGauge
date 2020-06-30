@@ -67,6 +67,8 @@ pip install -r requirements
 
 ### Analysis
 
+![Shapley importances](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_shapley.png)
+
 ![pO2 distributions](https://github.com/wrs28/PressorGauge/blob/master/images/pO2_dist.png)
 
 ![Random Forest Learning Curve](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_learning_curve.png)
