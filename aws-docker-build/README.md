@@ -37,6 +37,27 @@ This does not affect the deployment.
 
 #### Content of `/aws-docker-build/docker-compose.yml`
 
-Sensitive credentials stored locally in `.env` file.
+SQL credentials stored locally in `.env` file.
 
 Streamlit uses port `8501`, which is rerouted to `80`.
+
+
+
+<!-- ###
+
+sudo amazon-linux-extras install postgresql10 vim epel
+sudo yum install -y postgresql-server postgresql-devel
+sudo /usr/bin/postgresql-setup –-initdb
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
+sudo systemctl status postgresql
+
+`python --version`
+
+`sudo yum install python37`
+
+`curl -O https://bootstrap.pypa.io/get-pip.py`
+
+`python3 get-pip.py --user`
+
+`pip3 install --upgrade --user awscli` -->
