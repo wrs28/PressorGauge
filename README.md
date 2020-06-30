@@ -62,15 +62,39 @@ pip install -r requirements
 ### Training the Model
 
 
-###
+### AWS
+
+To serve the model locally, simply run
+````
+streamlit run PressorGauge.py
+````
+
+To create and run a Docker image locally, can call the script `local_build.sh`.
+
+To publish a Docker image to [dockerhub](https://hub.docker.com) and push it to AWS, call the script `aws-docker-build/aws_build.sh`.
+Note this file must be adapted for your local build.
+The first line `source insight` activates the PressorGauge environment, changes directory to `PressorGauge`, and loads credentials as enviorenmental variables.
 
 
 ### Analysis
 
-![Shapley importances](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_shapley.png)
+The data has been aggregated in 12-hour windows, with a 6-hr overlap between each window.
+Those that end 12 hours or less from a pressor event define the positive class, everything else is negative.
+
+Looking at the distribution between classes of some of the features shows correlation with pressor outcome.
+For example, this is visible in the partial-pressure O2 (blood gas test):
 
 ![pO2 distributions](https://github.com/wrs28/PressorGauge/blob/master/images/pO2_dist.png)
 
+
+A preliminary model training gives random forest feature importances, which can be compared to the Shapley importances (explained [here](https://github.com/slundberg/shap)), which show that among the lab features considered here, a long PTT (prothrombin time [test]), a high partial pressure O2, and an abnormal lactate test all strongly influence the classification.
+
+![Shapley importances](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_shapley.png)
+
+The model is trained on `11_777` test windows, and the learning curve suggests that the model does not suffer too much from overfitting.
+
 ![Random Forest Learning Curve](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_learning_curve.png)
+
+The AUROC score of the model is .7, with mean time from prediction to event of 8 hours.
 
 ![Random Forest ROC curve](https://github.com/wrs28/PressorGauge/blob/master/images/random_forest_roc.png)
