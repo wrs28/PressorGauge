@@ -46,15 +46,15 @@ def preprocess_training_inputs():
         pickle.dump({"X": X, "y": y, "cv_groups": training_groups}, file)
 
 
-def preprocess_tests_inputs():
-    with open(os.path.join(directories.model_dir, "test_features.p"),"rb") as file:
+def preprocess_test_inputs():
+    with open(os.path.join(directories.model_dir, "test_features.p"), "rb") as file:
         test_inputs = pickle.load(file)
 
     # ground truth
     test_outputs = test_inputs.pop("LABEL")
 
     # encode F/M as 1/0
-    with open(os.path.join(directories.model_dir, "scaler_encoder.p"), "rsb") as file:
+    with open(os.path.join(directories.model_dir, "scaler_encoder.p"), "rb") as file:
         dict = pickle.load(file)
     enc = dict["encoder"]
     test_inputs.GENDER = enc.transform(pd.DataFrame(test_inputs.GENDER))
